@@ -3,10 +3,10 @@
 ```
 # Generate a random value in the secp256k1 field
 k = random.randrange(1, SECP256K1_ORDER)
+k_key = ECKey()
 
 # Create an uncompressed key from k so it's easier to access the y-coordinate, and get the pubkey
-k_key = ECKey()
-k_key.set(k.to_bytes(32,'big'), False)
+k_key.set(k, False)
 R = k_key.get_pubkey()
 
 # Find the x- and y-coordinates from R
@@ -17,8 +17,7 @@ R_y = int.from_bytes(R.get_bytes()[33:], "big")
 minus_k = SECP256K1_ORDER - k
 
 # Create an uncompressed key from -k so it's easier to access the y-coordinate, and get the pubkey
-minus_k_key = ECKey()
-minus_k_key.set(minus_k.to_bytes(32,'big'), False)
+minus_k_key = ECKey().set(minus_k, False)
 minus_R = minus_k_key.get_pubkey()
 
 # Find the x- and y-coordinates from -R
@@ -35,14 +34,11 @@ print("Success!")
 
 ```
 msg = hashlib.sha256(b'message').digest()
-x = ECKey()
-x.generate()
+x = ECKey().generate()
 P = x.get_pubkey()
 
 # We have to set uncompressed to get the y-coordinate.
-# k_int = random.randrange(1, SECP256K1_ORDER)
-k = ECKey()
-k.generate(False) # Uncompressed.
+k = ECKey().generate(False) # Uncompressed.
 R = k.get_pubkey()
 
 print(R.get_bytes().hex())
@@ -62,7 +58,7 @@ s = k + h * x
 sig = R.get_bytes()[1:33] + s.secret.to_bytes(32,'big')
 
 # Verify the signature
-assert ECPubKey.verify_schnorr(sig, msg)
+assert P.verify_schnorr(sig, msg)
 
 print("Success!")
 ```
